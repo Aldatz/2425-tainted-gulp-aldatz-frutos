@@ -1,35 +1,35 @@
-import { getData } from "./service.mjs";
+import { getData, getDataCharacter } from "./service.mjs";
 import Ingredients from "./ingredients.mjs";
 import Cauldrons from "./cauldron.mjs";
+import PotionBag from "./PotionBag.mjs";
+import Character from "./Character.mjs";
 
 const execute = async () => {
     try {
         const data = await getData();
-
+        const characterData = await getDataCharacter();
         const ingredients = Ingredients.load(data);
-
         const cauldron = new Cauldrons(ingredients);
+        const getBag = characterData.players[0].pouch_yellow;
+        const potionBag = PotionBag.create(getBag, cauldron);
+        const character = Character.from(characterData.players[0], potionBag.potions);
 
-        const potion1 = cauldron.createPotions("Bear Claws", "Bee");
-        showPotion(potion1)
-        const potion2 = cauldron.createPotions("Chicken's Egg", "Chaurus Eggs");
-        showPotion(potion2)
-        const potion3 = cauldron.createPotions("Chaurus Eggs", "Bleeding Crown");
-        showPotion(potion3)
-        const potion4 = cauldron.createPotions("Nightshade", "Ectoplasm");
-        showPotion(potion4)
-
-        function showPotion(potion){
-            console.log(`${potion.name}`);
-            console.log(`Value:         ${potion.value}`);
-            console.log(`Weight:        ${potion.weight}`);
-            console.log(`Time:          ${potion.time}`);
-            console.log(`-------------------------`);
-        }
-
+        showCharacter(character);
     } catch (error) {
-        console.error("Error ejecutando el código: ", error);  // Mostrar el error en consola
+        console.error("Error ejecutando el código: ", error);
     }
+};
+
+function showCharacter(character) {
+    console.log(`${character.fullName}`);
+    console.log('------------------------------------------');
+    console.log(`Health:         ${character.health}`);
+    console.log(`Magick:         ${character.magick}`);
+    console.log(`Stamina:        ${character.stamina}`);
+    
+    character.potions.forEach((potion, index) => {
+        console.log(`Potion ${index + 1}:       ${potion.name}`);
+    });
 }
 
 execute();
